@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BluePulse - Ocean to Atmosphere Journey</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --ocean-blue: #0066cc;
+            --deep-blue: #003d7a;
+            --sky-blue: #87ceeb;
+            --cloud-white: #f0f8ff;
+            --wave-teal: #008b8b;
+            --air-gray: #b0c4de;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            background: linear-gradient(180deg, var(--deep-blue) 0%, var(--ocean-blue) 50%, var(--sky-blue) 100%);
+        }
+
+        .scroll-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--deep-blue) 0%, var(--ocean-blue) 100%);
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content h1 {
+            font-size: clamp(2.5rem, 8vw, 6rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero-content p {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .floating-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+
+        .coastline-section {
+            background: linear-gradient(to bottom, var(--ocean-blue), var(--wave-teal));
+            color: white;
+        }
+
+        .ocean-section {
+            background: linear-gradient(45deg, var(--deep-blue), var(--ocean-blue));
+            color: white;
+        }
+
+        .atmosphere-section {
+            background: linear-gradient(to top, var(--sky-blue), var(--cloud-white));
+            color: var(--deep-blue);
+        }
+
+        .jetstream-section {
+            background: linear-gradient(135deg, var(--air-gray), var(--cloud-white));
+            color: var(--deep-blue);
+        }
+
+        .data-visualization {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .wave-animation {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath d='M0,60 C300,120 900,0 1200,60 L1200,120 L0,120 Z' fill='rgba(255,255,255,0.1)'/%3E%3C/svg%3E") repeat-x;
+            animation: wave 3s ease-in-out infinite;
+        }
+
+        .progress-indicator {
+            position: fixed;
+            top: 50%;
+            right: 2rem;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .progress-dot.active {
+            background: white;
+            transform: scale(1.5);
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            text-align: center;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.6s ease;
+        }
+
+        .metric-card.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .flying-transition {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent 20%, rgba(0, 102, 204, 0.8) 80%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: 999;
+        }
+
+        .flying-transition.active {
+            opacity: 1;
+        }
+
+        .scroll-prompt {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            text-align: center;
+            animation: bounce 2s infinite;
+        }
+
+        .connection-line {
+            position: absolute;
+            width: 2px;
+            height: 200px;
+            background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.5), transparent);
+            left: 50%;
+            transform: translateX(-50%);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes wave {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(-20px);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.5;
+                transform: translateX(-50%) scaleY(1);
+            }
+            50% {
+                opacity: 1;
+                transform: translateX(-50%) scaleY(1.1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .progress-indicator {
+                right: 1rem;
+            }
+            
+            .data-visualization {
+                padding: 1rem;
+                margin: 1rem 0;
+            }
+            
+            .metric-card {
+                padding: 1rem;
+            }
+            
+            .metric-value {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Flying Transition Effect -->
+    <div class="flying-transition" id="flyingTransition"></div>
+
+    <!-- Progress Indicator -->
+    <div class="progress-indicator" id="progressIndicator">
+        <div class="progress-dot active" data-section="0"></div>
+        <div class="progress-dot" data-section="1"></div>
+        <div class="progress-dot" data-section="2"></div>
+        <div class="progress-dot" data-section="3"></div>
+        <div class="progress-dot" data-section="4"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="scroll-section hero-section" id="section-0">
+        <div class="floating-particles" id="particles"></div>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="hero-content">
+                        <h1>BluePulse</h1>
+                        <p>Journey from ocean depths to the jet stream</p>
+                        <p class="lead">Discover how ocean conditions and air quality dance together in an endless atmospheric ballet</p>
+                        <div class="scroll-prompt">
+                            <i class="fas fa-chevron-down fa-2x"></i>
+                            <div>Scroll to begin your journey</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Coastline Section -->
+    <section class="scroll-section coastline-section" id="section-1">
+        <div class="wave-animation"></div>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h2 class="display-4 mb-4">Coastal Waters</h2>
+                    <p class="lead">Where the ocean meets the sky, powerful exchanges begin. Coastal waters are the birthplace of weather systems that travel thousands of miles.</p>
+                    
+                    <div class="data-visualization">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="metric-card" data-animate="coastline">
+                                    <div class="metric-value" id="seaTemp">22.5°C</div>
+                                    <div>Sea Surface Temperature</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="metric-card" data-animate="coastline">
+                                    <div class="metric-value" id="humidity">78%</div>
+                                    <div>Relative Humidity</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="metric-card" data-animate="coastline">
+                                    <div class="metric-value" id="windSpeed">12 km/h</div>
+                                    <div>Wind Speed</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="connection-line"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ocean Section -->
+    <section class="scroll-section ocean-section" id="section-2">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h2 class="display-4 mb-4">Deep Ocean Currents</h2>
+                    <p class="lead">Beneath the surface, massive currents carry heat and nutrients across continents, driving weather patterns and air quality changes globally.</p>
+                    
+                    <div class="data-visualization">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="metric-card" data-animate="ocean">
+                                    <div class="metric-value" id="currentSpeed">2.3 m/s</div>
+                                    <div>Current Velocity</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="metric-card" data-animate="ocean">
+                                    <div class="metric-value" id="thermalEnergy">1.2 PJ</div>
+                                    <div>Thermal Energy Transfer</div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mt-4">Ocean currents transport 20 times more heat than the atmosphere, directly influencing air temperatures and precipitation patterns thousands of kilometers away.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Atmosphere Section -->
+    <section class="scroll-section atmosphere-section" id="section-3">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h2 class="display-4 mb-4">Atmospheric Exchange</h2>
+                    <p class="lead">Rising through the troposphere, we witness the intricate dance between oceanic moisture and atmospheric chemistry.</p>
+                    
+                    <div class="data-visualization">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="metric-card" data-animate="atmosphere">
+                                    <div class="metric-value" id="pm25">18 μg/m³</div>
+                                    <div>PM2.5 Concentration</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="metric-card" data-animate="atmosphere">
+                                    <div class="metric-value" id="ozone">65 ppb</div>
+                                    <div>Ground-level Ozone</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="metric-card" data-animate="atmosphere">
+                                    <div class="metric-value" id="pressure">1013 hPa</div>
+                                    <div>Atmospheric Pressure</div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mt-4">Ocean-derived aerosols and moisture interact with pollutants, creating complex patterns that affect air quality across continents.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Jet Stream Section -->
+    <section class="scroll-section jetstream-section" id="section-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-10">
+                    <h2 class="display-4 mb-4">The Jet Stream</h2>
+                    <p class="lead">At 10 kilometers altitude, high-speed winds carry the ocean's influence across the globe, connecting distant shores through invisible highways in the sky.</p>
+                    
+                    <div class="data-visualization">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="metric-card" data-animate="jetstream">
+                                    <div class="metric-value" id="jetSpeed">180 km/h</div>
+                                    <div>Jet Stream Velocity</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="metric-card" data-animate="jetstream">
+                                    <div class="metric-value" id="altitude">10.5 km</div>
+                                    <div>Altitude</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="metric-card" data-animate="jetstream">
+                                    <div class="metric-value" id="transport">50 Mt</div>
+                                    <div>Daily Mass Transport</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="metric-card" data-animate="jetstream">
+                                    <div class="metric-value" id="globalCoverage">95%</div>
+                                    <div>Global Coverage</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-5 text-center">
+                            <h4>The Complete Connection</h4>
+                            <p class="lead">From ocean surface to jet stream, you've witnessed the invisible threads that weave our planet's climate and air quality into one dynamic system.</p>
+                            <button class="btn btn-primary btn-lg mt-3" onclick="restartJourney()">
+                                <i class="fas fa-redo-alt me-2"></i>Begin Journey Again
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        class BluePulseApp {
+            constructor() {
+                this.currentSection = 0;
+                this.sections = document.querySelectorAll('.scroll-section');
+                this.progressDots = document.querySelectorAll('.progress-dot');
+                this.flyingTransition = document.getElementById('flyingTransition');
+                this.isTransitioning = false;
+                
+                this.init();
+            }
+
+            init() {
+                this.createParticles();
+                this.setupScrollListeners();
+                this.setupProgressIndicator();
+                this.animateMetrics();
+                this.updateDataValues();
+                
+                // Start data animation interval
+                setInterval(() => this.updateDataValues(), 3000);
+            }
+
+            createParticles() {
+                const particlesContainer = document.getElementById('particles');
+                const particleCount = window.innerWidth < 768 ? 30 : 60;
+
+                for (let i = 0; i < particleCount; i++) {
+                    setTimeout(() => {
+                        const particle = document.createElement('div');
+                        particle.className = 'particle';
+                        particle.style.left = Math.random() * 100 + '%';
+                        particle.style.animationDelay = Math.random() * 6 + 's';
+                        particle.style.animationDuration = (4 + Math.random() * 4) + 's';
+                        particlesContainer.appendChild(particle);
+                    }, i * 100);
+                }
+            }
+
+            setupScrollListeners() {
+                let ticking = false;
+                
+                window.addEventListener('scroll', () => {
+                    if (!ticking) {
+                        requestAnimationFrame(() => {
+                            this.handleScroll();
+                            ticking = false;
+                        });
+                        ticking = true;
+                    }
+                });
+
+                // Smooth scrolling for mobile
+                window.addEventListener('touchmove', this.handleScroll.bind(this), { passive: true });
+            }
+
+            handleScroll() {
+                if (this.isTransitioning) return;
+
+                const scrollPosition = window.pageYOffset;
+                const windowHeight = window.innerHeight;
+                const totalHeight = document.documentElement.scrollHeight - windowHeight;
+                
+                // Calculate current section based on scroll position
+                const newSection = Math.min(
+                    Math.floor((scrollPosition / totalHeight) * this.sections.length),
+                    this.sections.length - 1
+                );
+
+                if (newSection !== this.currentSection) {
+                    this.transitionToSection(newSection);
+                }
+
+                // Update progress indicator
+                this.updateProgressIndicator(scrollPosition / totalHeight);
+                
+                // Animate visible metric cards
+                this.animateVisibleCards();
+            }
+
+            transitionToSection(newSection) {
+                if (this.isTransitioning) return;
+                
+                this.isTransitioning = true;
+                this.currentSection = newSection;
+
+                // Flying transition effect
+                this.flyingTransition.classList.add('active');
+                
+                setTimeout(() => {
+                    this.flyingTransition.classList.remove('active');
+                    this.isTransitioning = false;
+                }, 500);
+
+                // Update progress dots
+                this.progressDots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === newSection);
+                });
+            }
+
+            setupProgressIndicator() {
+                this.progressDots.forEach((dot, index) => {
+                    dot.addEventListener('click', () => {
+                        this.scrollToSection(index);
+                    });
+                });
+            }
+
+            scrollToSection(sectionIndex) {
+                const section = this.sections[sectionIndex];
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            updateProgressIndicator(progress) {
+                const totalSections = this.sections.length;
+                const currentSectionProgress = progress * totalSections;
+                
+                this.progressDots.forEach((dot, index) => {
+                    const isActive = index <= currentSectionProgress;
+                    dot.style.opacity = isActive ? '1' : '0.3';
+                    dot.style.transform = index === Math.floor(currentSectionProgress) 
+                        ? 'scale(1.5)' : 'scale(1)';
+                });
+            }
+
+            animateVisibleCards() {
+                const cards = document.querySelectorAll('.metric-card');
+                
+                cards.forEach(card => {
+                    const rect = card.getBoundingClientRect();
+                    const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+                    
+                    if (isVisible) {
+                        card.classList.add('visible');
+                    }
+                });
+            }
+
+            animateMetrics() {
+                // Initial animation for all metric cards
+                setTimeout(() => {
+                    this.animateVisibleCards();
+                }, 1000);
+            }
+
+            updateDataValues() {
+                // Simulate real-time data updates with realistic variations
+                const updates = {
+                    seaTemp: () => (22.5 + (Math.random() - 0.5) * 2).toFixed(1) + '°C',
+                    humidity: () => Math.floor(75 + Math.random() * 10) + '%',
+                    windSpeed: () => Math.floor(10 + Math.random() * 8) + ' km/h',
+                    currentSpeed: () => (2.0 + Math.random() * 0.8).toFixed(1) + ' m/s',
+                    thermalEnergy: () => (1.0 + Math.random() * 0.5).toFixed(1) + ' PJ',
+                    pm25: () => Math.floor(15 + Math.random() * 10) + ' μg/m³',
+                    ozone: () => Math.floor(60 + Math.random() * 15) + ' ppb',
+                    pressure: () => Math.floor(1008 + Math.random() * 10) + ' hPa',
+                    jetSpeed: () => Math.floor(160 + Math.random() * 40) + ' km/h',
+                    altitude: () => (10.2 + Math.random() * 0.6).toFixed(1) + ' km',
+                    transport: () => Math.floor(45 + Math.random() * 15) + ' Mt',
+                    globalCoverage: () => Math.floor(92 + Math.random() * 6) + '%'
+                };
+
+                Object.entries(updates).forEach(([id, updateFn]) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = updateFn();
+                        element.style.transition = 'color 0.3s ease';
+                        element.style.color = '#00ff88';
+                        setTimeout(() => {
+                            element.style.color = '';
+                        }, 300);
+                    }
+                });
+            }
+
+            restartJourney() {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                this.currentSection = 0;
+                this.updateProgressIndicator(0);
+            }
+        }
+
+        // Global restart function
+        function restartJourney() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = new BluePulseApp();
+            
+            // Expose restart function globally
+            window.restartJourney = () => app.restartJourney();
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            // Recreate particles for responsive design
+            const particlesContainer = document.getElementById('particles');
+            if (particlesContainer) {
+                particlesContainer.innerHTML = '';
+                setTimeout(() => {
+                    const app = new BluePulseApp();
+                }, 100);
+            }
+        });
+
+        // Optimize performance for mobile
+        if ('ontouchstart' in window) {
+            document.body.style.overflowX = 'hidden';
+            
+            // Reduce particle count on mobile
+            const style = document.createElement('style');
+            style.textContent = `
+                @media (max-width: 768px) {
+                    .particle { animation-duration: 8s !important; }
+                    .wave-animation { animation-duration: 4s !important; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    </script>
+</body>
+</html>
