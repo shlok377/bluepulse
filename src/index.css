@@ -1,0 +1,189 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* BluePulse Design System - Atmospheric to Oceanic Journey */
+
+@layer base {
+  :root {
+    /* Atmospheric Gradients */
+    --sky-light: 200 100% 85%;
+    --sky-mid: 210 90% 70%;
+    --sky-deep: 220 80% 45%;
+    
+    /* Ocean Gradients */
+    --ocean-surface: 190 80% 65%;
+    --ocean-mid: 200 70% 45%;
+    --ocean-deep: 220 60% 25%;
+    --ocean-abyss: 230 50% 15%;
+    
+    /* Data Visualization */
+    --data-primary: 195 85% 55%;
+    --data-secondary: 210 75% 40%;
+    --data-accent: 185 90% 70%;
+    --data-warning: 35 85% 60%;
+    
+    /* Glass Morphism */
+    --glass-bg: 200 50% 95% / 0.1;
+    --glass-border: 200 50% 90% / 0.2;
+    --glass-backdrop: blur(20px);
+    
+    /* Core Theme Colors */
+    --background: 220 60% 5%;
+    --foreground: 200 50% 95%;
+
+    --card: 220 50% 10% / 0.8;
+    --card-foreground: 200 50% 95%;
+
+    --popover: 220 50% 8%;
+    --popover-foreground: 200 50% 95%;
+
+    --primary: 195 85% 55%;
+    --primary-foreground: 220 60% 5%;
+
+    --secondary: 210 40% 20%;
+    --secondary-foreground: 200 50% 95%;
+
+    --muted: 220 30% 15%;
+    --muted-foreground: 200 20% 70%;
+
+    --accent: 185 90% 70%;
+    --accent-foreground: 220 60% 5%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 200 50% 95%;
+
+    --border: 220 30% 20%;
+    --input: 220 30% 15%;
+    --ring: 195 85% 55%;
+
+    --radius: 1rem;
+
+    /* Atmospheric Sections */
+    --jetstream-bg: linear-gradient(180deg, hsl(var(--sky-light)), hsl(var(--sky-mid)));
+    --atmosphere-bg: linear-gradient(180deg, hsl(var(--sky-mid)), hsl(var(--sky-deep)));
+    --coastal-bg: linear-gradient(180deg, hsl(var(--sky-deep)), hsl(var(--ocean-surface)));
+    --ocean-bg: linear-gradient(180deg, hsl(var(--ocean-mid)), hsl(var(--ocean-abyss)));
+    
+    /* Particle Effects */
+    --particle-flow: hsl(var(--data-accent) / 0.6);
+    --particle-glow: hsl(var(--data-primary) / 0.8);
+    
+    /* Text Shadows for Readability */
+    --text-shadow-light: 0 2px 4px hsl(220 60% 5% / 0.3);
+    --text-shadow-heavy: 0 4px 8px hsl(220 60% 5% / 0.7);
+    
+    /* Animations */
+    --transition-smooth: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-bounce: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    --sidebar-background: 220 50% 10%;
+    --sidebar-foreground: 200 50% 95%;
+    --sidebar-primary: 195 85% 55%;
+    --sidebar-primary-foreground: 220 60% 5%;
+    --sidebar-accent: 220 30% 15%;
+    --sidebar-accent-foreground: 200 50% 95%;
+    --sidebar-border: 220 30% 20%;
+    --sidebar-ring: 195 85% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground overflow-x-hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Glass Morphism Components */
+  .glass-card {
+    @apply backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl;
+  }
+  
+  .data-panel {
+    @apply glass-card p-6 transition-all duration-500 hover:bg-white/15;
+  }
+  
+  /* Section Backgrounds with Parallax */
+  .section-jetstream {
+    background: var(--jetstream-bg);
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+  }
+  
+  .section-atmosphere {
+    background: var(--atmosphere-bg);
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+  }
+  
+  .section-coastal {
+    background: var(--coastal-bg);
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+  }
+  
+  .section-ocean {
+    background: var(--ocean-bg);
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+  }
+  
+  /* Floating Particles Animation */
+  .particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+  }
+  
+  .particle {
+    position: absolute;
+    background: var(--particle-flow);
+    border-radius: 50%;
+    animation: float 20s infinite linear;
+  }
+  
+  @keyframes float {
+    0% { transform: translateY(100vh) translateX(-50px) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-100px) translateX(50px) rotate(360deg); opacity: 0; }
+  }
+  
+  /* Data Visualization Animations */
+  .pulse-data {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+  
+  @keyframes pulse-glow {
+    from { box-shadow: 0 0 20px hsl(var(--data-primary) / 0.5); }
+    to { box-shadow: 0 0 40px hsl(var(--data-primary) / 0.8), 0 0 60px hsl(var(--data-accent) / 0.3); }
+  }
+  
+  /* Scroll Progress Indicator */
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, hsl(var(--data-primary)), hsl(var(--data-accent)));
+    transform-origin: left;
+    z-index: 100;
+  }
+}
